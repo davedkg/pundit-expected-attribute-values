@@ -13,3 +13,6 @@ gem "rails", ">= 7.0"
 gem "rspec", "~> 3.0"
 
 gem "rubocop", "~> 1.21"
+
+# rubocop 1.86 resolves parallel 2.1+, which requires Ruby >= 3.3.
+gem "parallel", ">= 1.10", "< 2.1"
