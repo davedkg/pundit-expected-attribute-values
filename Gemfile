@@ -9,8 +9,6 @@ gem "irb"
 gem "rake", "~> 13.0"
 
 gem "minitest", "~> 5.16"
-# Rails 8 resolves connection_pool 3.x, which requires Ruby >= 3.2.
-gem "connection_pool", ">= 2.2.5", "< 3"
 gem "rails", ">= 7.0"
 gem "rspec", "~> 3.0"
 
