@@ -1,0 +1,70 @@
+name: Ruby
+
+on:
+  push:
+    branches:
+      - main
+      - release/**
+
+  pull_request:
+
+jobs:
+  minitest:
+    runs-on: ubuntu-latest
+    name: Minitest (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.1"
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run Minitest
+        run: bundle exec rake test
+
+  rspec:
+    runs-on: ubuntu-latest
+    name: RSpec (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.1"
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run RSpec
+        run: bundle exec rake spec
+
+  rubocop:
+    runs-on: ubuntu-latest
+    name: RuboCop (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.1"
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run RuboCop
+        run: bundle exec rubocop
