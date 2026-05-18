@@ -8,7 +8,7 @@ Keys stay in `expected_attributes_for_action`; allowed values live in `expected_
 
 ## Requirements
 
-- Ruby >= 3.2
+- Ruby >= 3.3
 - Pundit >= 2.5 (ships a compatibility shim for `expected_attributes` until Pundit 2.6 is released)
 - Rails >= 7.0 (uses `params.expect`)
 
