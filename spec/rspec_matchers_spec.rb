@@ -24,4 +24,18 @@ RSpec.describe "Pundit expected value matchers" do
       expect(admin_policy).to permit_expected_values(:role).matching(%w[user manager admin])
     end
   end
+
+  describe "collection attributes" do
+    it "permits an element within the allowed set" do
+      expect(admin_policy).to permit_expected_value(:tags, "ruby")
+    end
+
+    it "rejects an element outside the allowed set" do
+      expect(admin_policy).not_to permit_expected_value(:tags, "java")
+    end
+
+    it "matches the full allowed set for the collection" do
+      expect(admin_policy).to permit_expected_values(:tags).matching(%w[ruby rails pundit])
+    end
+  end
 end

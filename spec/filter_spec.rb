@@ -51,6 +51,49 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
     end
   end
 
+  describe ".call with array attributes" do
+    it "keeps string elements that are in the expected set and drops the rest (:strip)" do
+      array_params = ActionController::Parameters.new(tags: %w[ruby java rails])
+      result = described_class.call(array_params, { tags: %w[ruby rails pundit] }, invalid: :strip, policy: policy)
+      expect(result[:tags]).to eq(%w[ruby rails])
+    end
+
+    it "normalizes symbol elements against a string expected set" do
+      array_params = ActionController::Parameters.new(tags: %i[ruby java])
+      result = described_class.call(array_params, { tags: %w[ruby rails] }, invalid: :strip, policy: policy)
+      expect(result[:tags]).to eq(%w[ruby])
+    end
+
+    it "omits the key when every element is unexpected (:strip)" do
+      array_params = ActionController::Parameters.new(tags: %w[x y])
+      result = described_class.call(array_params, { tags: %w[ruby] }, invalid: :strip, policy: policy)
+      expect(result.key?(:tags)).to be false
+    end
+
+    it "omits the key when the submitted array is empty (:strip)" do
+      array_params = ActionController::Parameters.new(tags: [])
+      result = described_class.call(array_params, { tags: %w[ruby] }, invalid: :strip, policy: policy)
+      expect(result.key?(:tags)).to be false
+    end
+
+    it "keeps all elements when every element is expected (:raise)" do
+      array_params = ActionController::Parameters.new(tags: %w[ruby rails])
+      result = described_class.call(array_params, { tags: %w[ruby rails pundit] }, invalid: :raise, policy: policy)
+      expect(result[:tags]).to eq(%w[ruby rails])
+    end
+
+    it "raises on any invalid element (:raise)" do
+      array_params = ActionController::Parameters.new(tags: %w[ruby java rails])
+      expect do
+        described_class.call(array_params, { tags: %w[ruby rails] }, invalid: :raise, policy: policy)
+      end.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
+        expect(error.attribute).to eq(:tags)
+        expect(error.value).to eq("java")
+        expect(error.expected).to eq(%w[ruby rails])
+      end
+    end
+  end
+
   describe ".call with :raise" do
     it "raises UnexpectedValue for unexpected scalar" do
       expect do

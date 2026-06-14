@@ -53,6 +53,30 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
     ensure
       Pundit::ExpectedAttributeValues.invalid_behavior = :strip
     end
+
+    it "filters array attribute elements end-to-end (:strip)" do
+      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
+      controller.params = ActionController::Parameters.new(
+        test_record: { name: "Ada", tags: %w[ruby java rails] }
+      )
+      result = controller.expected_attributes(record)
+      expect(result[:name]).to eq("Ada")
+      expect(result[:tags]).to eq(%w[ruby rails])
+    end
+
+    it "raises on an invalid array element end-to-end (:raise)" do
+      Pundit::ExpectedAttributeValues.invalid_behavior = :raise
+      controller.params = ActionController::Parameters.new(
+        test_record: { name: "Ada", tags: %w[ruby java] }
+      )
+      expect { controller.expected_attributes(record) }
+        .to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
+        expect(error.attribute).to eq(:tags)
+        expect(error.value).to eq("java")
+      end
+    ensure
+      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
+    end
   end
 
   describe ".filter" do

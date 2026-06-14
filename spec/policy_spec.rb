@@ -22,5 +22,26 @@ RSpec.describe Pundit::ExpectedAttributeValues::Policy do
       policy = TestUserUpdatePolicy.new(admin, record)
       expect(policy.pundit_expected_attribute_values_for_attribute(:role, action: "update")).to eq(%w[user])
     end
+
+    it "resolves a collection attribute from a static array source" do
+      policy = TestUserPolicy.new(admin, record)
+      expect(policy.pundit_expected_attribute_values_for_attribute(:tags, action: "update")).to eq(
+        %w[ruby rails pundit]
+      )
+    end
+
+    it "resolves a collection attribute from a method reference source" do
+      policy = TestUserPolicy.new(admin, record)
+      expect(policy.pundit_expected_attribute_values_for_attribute(:labels, action: "update")).to eq(
+        %w[bug feature chore]
+      )
+    end
+
+    it "resolves a collection attribute from a callable source" do
+      policy = TestUserPolicy.new(admin, record)
+      expect(policy.pundit_expected_attribute_values_for_attribute(:groups, action: "update")).to eq(
+        %w[alpha beta]
+      )
+    end
   end
 end

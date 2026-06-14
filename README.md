@@ -5,7 +5,7 @@
 
 Expected **values** for [Pundit](https://github.com/varvet/pundit) strong parameters. Works with Pundit 2.6+ `expected_attributes` / `expected_attributes_for_action` and Rails `params.expect`.
 
-Declare which scalar values each attribute may have during mass assignment (for example, admins may set `role` to `manager` or `user`, while managers may only set `role` to `user`).
+Declare which values each attribute may have during mass assignment (for example, admins may set `role` to `manager` or `user`, while managers may only set `role` to `user`). Attributes may be **scalar or array (collection)** — for an array attribute, each submitted element is validated against the allowed set.
 
 Keys stay in `expected_attributes_for_action`; allowed values live in `expected_attribute_values_for_action`.
 
@@ -75,6 +75,27 @@ end
 ```
 
 Value sources: static arrays, callables (`-> { ... }`), or method references (`:allowed_roles`).
+
+### Collection (array) attributes
+
+An attribute submitted as an array (e.g. a multi-select like `tag_ids` or `roles[]`) is validated element by element against the same allowed set:
+
+```ruby
+class ArticlePolicy < ApplicationPolicy
+  def expected_attributes_for_action(_action)
+    [:title, { tags: [] }] # keys: declare the array shape for params.expect
+  end
+
+  def expected_attribute_values_for_action(_action)
+    { tags: %w[ruby rails pundit] } # allowed values for each element
+  end
+end
+```
+
+Given `params` of `tags: %w[ruby java rails]`:
+
+- with `invalid_behavior = :strip` (default), out-of-set elements are dropped — `tags` becomes `%w[ruby rails]` (the key is omitted entirely if no elements remain).
+- with `invalid_behavior = :raise`, any out-of-set element raises `Pundit::ExpectedAttributeValues::UnexpectedValue`.
 
 ### Controller
 

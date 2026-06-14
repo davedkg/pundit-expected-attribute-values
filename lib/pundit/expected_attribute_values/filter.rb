@@ -49,8 +49,7 @@ module Pundit
         value = result[key]
 
         if value.is_a?(Array)
-          filtered = value.select { |element| expected.include?(ValueResolver.normalize_value(element)) }
-          handle_filtered(result, key, filtered, value, expected)
+          filter_array!(result, key, value, expected)
         else
           normalized = ValueResolver.normalize_value(value)
           if expected.include?(normalized)
@@ -61,13 +60,25 @@ module Pundit
         end
       end
 
-      def handle_filtered(result, key, filtered, original, expected)
-        if filtered.empty? && !original.empty?
-          handle_unexpected(result, key, original, expected)
-        elsif filtered.empty?
+      # Validate each element of an array attribute against the allowed set.
+      # Under +:raise+, any out-of-set element raises immediately; under
+      # +:strip+, invalid elements are dropped and the key is removed when no
+      # valid elements remain.
+      def filter_array!(result, key, original, expected)
+        kept = []
+        original.each do |element|
+          normalized = ValueResolver.normalize_value(element)
+          if expected.include?(normalized)
+            kept << normalized
+          elsif @invalid == :raise
+            raise UnexpectedValue.new(attribute: key, value: element, expected: expected)
+          end
+        end
+
+        if kept.empty?
           result.delete(key)
         else
-          result[key] = filtered.map { |v| ValueResolver.normalize_value(v) }
+          result[key] = kept
         end
       end
 

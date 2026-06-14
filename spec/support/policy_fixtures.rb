@@ -31,11 +31,16 @@ class TestUserPolicy
   end
 
   def expected_attributes_for_action(_action)
-    %i[name email role]
+    [:name, :email, :role, { tags: [], labels: [], groups: [] }]
   end
 
   def expected_attribute_values
-    { role: :allowed_roles }
+    {
+      role: :allowed_roles,
+      tags: %w[ruby rails pundit],  # static array source
+      labels: :allowed_labels,      # method reference source
+      groups: -> { %w[alpha beta] } # callable source
+    }
   end
 
   def allowed_roles
@@ -43,6 +48,10 @@ class TestUserPolicy
     return %w[user] if user.manager?
 
     []
+  end
+
+  def allowed_labels
+    %w[bug feature chore]
   end
 end
 
