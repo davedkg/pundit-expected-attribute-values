@@ -1,3 +1,9 @@
+# Merge our AllCops/Exclude with RuboCop's defaults (vendor/**/*, etc.) instead
+# of replacing them — otherwise CI's vendor/bundle gets scanned.
+inherit_mode:
+  merge:
+    - Exclude
+
 AllCops:
   TargetRubyVersion: 3.3
   NewCops: enable
