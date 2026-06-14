@@ -42,8 +42,11 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
       before { Pundit::ExpectedAttributeValues.invalid_behavior = :strip }
 
       context "with an unexpected scalar value" do
-        it "filters values after params extraction" do
+        it "keeps the expected attributes" do
           expect(filtered[:name]).to eq("Ada")
+        end
+
+        it "omits the unexpected attribute" do
           expect(filtered.key?(:role)).to be false
         end
       end
@@ -51,8 +54,11 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
       context "with an array attribute" do
         let(:submitted) { { name: "Ada", tags: %w[ruby java rails] } }
 
-        it "filters elements to the expected set" do
+        it "keeps the expected attributes" do
           expect(filtered[:name]).to eq("Ada")
+        end
+
+        it "filters elements to the expected set" do
           expect(filtered[:tags]).to eq(%w[ruby rails])
         end
       end
@@ -71,10 +77,10 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
         let(:submitted) { { name: "Ada", tags: %w[ruby java] } }
 
         it "raises UnexpectedValue for the offending element" do
-          expect { filtered }.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
-            expect(error.attribute).to eq(:tags)
-            expect(error.value).to eq("java")
-          end
+          expect { filtered }.to raise_error(
+            an_instance_of(Pundit::ExpectedAttributeValues::UnexpectedValue)
+              .and(have_attributes(attribute: :tags, value: "java"))
+          )
         end
       end
     end

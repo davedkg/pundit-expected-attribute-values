@@ -10,8 +10,11 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
 
   describe "scalar attributes" do
     context "when the value is expected" do
-      it "keeps the value alongside other attributes" do
+      it "keeps the value" do
         expect(result[:role]).to eq("admin")
+      end
+
+      it "leaves other attributes untouched" do
         expect(result[:name]).to eq("Ada")
       end
     end
@@ -20,8 +23,11 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
       let(:constraints) { { role: %w[user] } }
 
       context "with :strip" do
-        it "omits the attribute and keeps the rest" do
+        it "omits the attribute" do
           expect(result.key?(:role)).to be false
+        end
+
+        it "leaves other attributes untouched" do
           expect(result[:name]).to eq("Ada")
         end
       end
@@ -29,12 +35,11 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
       context "with :raise" do
         let(:invalid) { :raise }
 
-        it "raises UnexpectedValue with details" do
-          expect { result }.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
-            expect(error.attribute).to eq(:role)
-            expect(error.value).to eq("admin")
-            expect(error.expected).to eq(%w[user])
-          end
+        it "raises UnexpectedValue describing the rejected value" do
+          expect { result }.to raise_error(
+            an_instance_of(Pundit::ExpectedAttributeValues::UnexpectedValue)
+              .and(have_attributes(attribute: :role, value: "admin", expected: %w[user]))
+          )
         end
       end
     end
@@ -91,11 +96,10 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
         let(:constraints) { { tags: %w[ruby rails] } }
 
         it "raises UnexpectedValue for the offending element" do
-          expect { result }.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
-            expect(error.attribute).to eq(:tags)
-            expect(error.value).to eq("java")
-            expect(error.expected).to eq(%w[ruby rails])
-          end
+          expect { result }.to raise_error(
+            an_instance_of(Pundit::ExpectedAttributeValues::UnexpectedValue)
+              .and(have_attributes(attribute: :tags, value: "java", expected: %w[ruby rails]))
+          )
         end
       end
     end
