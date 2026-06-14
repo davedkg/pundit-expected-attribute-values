@@ -82,7 +82,13 @@ module Pundit
 
       def build_parameters(result)
         if defined?(ActionController::Parameters) && @params.is_a?(ActionController::Parameters)
-          ActionController::Parameters.new(result)
+          filtered = ActionController::Parameters.new(result)
+          # Preserve the permitted state of the source params. Callers such as
+          # the +expected_attributes+ controller helper pass already-permitted
+          # params (via +params.expect+); rebuilding would otherwise reset the
+          # flag and raise ActiveModel::ForbiddenAttributesError on assignment.
+          filtered.permit! if @params.permitted?
+          filtered
         else
           result
         end

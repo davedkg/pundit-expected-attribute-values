@@ -42,4 +42,25 @@ class FilterTest < Minitest::Test
     assert_equal :role, error.attribute
     assert_equal "admin", error.value
   end
+
+  def test_preserves_permitted_state_of_permitted_params
+    @params.permit!
+    result = Pundit::ExpectedAttributeValues::Filter.call(
+      @params,
+      { role: %w[user admin] },
+      invalid: :strip,
+      policy: @policy
+    )
+    assert result.permitted?
+  end
+
+  def test_leaves_unpermitted_params_unpermitted
+    result = Pundit::ExpectedAttributeValues::Filter.call(
+      @params,
+      { role: %w[user admin] },
+      invalid: :strip,
+      policy: @policy
+    )
+    refute result.permitted?
+  end
 end

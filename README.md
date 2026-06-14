@@ -1,5 +1,8 @@
 # pundit-expected-attribute-values
 
+[![CI](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml)
+[![Gem Version](https://badge.fury.io/rb/pundit-expected-attribute-values.svg)](https://badge.fury.io/rb/pundit-expected-attribute-values)
+
 Expected **values** for [Pundit](https://github.com/varvet/pundit) strong parameters. Works with Pundit 2.6+ `expected_attributes` / `expected_attributes_for_action` and Rails `params.expect`.
 
 Declare which scalar values each attribute may have during mass assignment (for example, admins may set `role` to `manager` or `user`, while managers may only set `role` to `user`).
@@ -144,11 +147,18 @@ assert_expected_values user_policy, :role, %w[user manager]
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`.
+
+## Releasing
+
+1. Update the version in `lib/pundit/expected_attribute_values/version.rb`.
+2. Add a dated section to [CHANGELOG.md](CHANGELOG.md).
+3. Commit, tag (`git tag vX.Y.Z`), and push the tag.
+4. GitHub Actions publishes the gem to [RubyGems](https://rubygems.org) when a `v*` tag is pushed. Configure [trusted publishing](https://guides.rubygems.org/trusted-publishing/) on RubyGems.org for this repository (recommended), or publish locally with `bundle exec rake release` after configuring RubyGems credentials.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/davedkg/pundit-expected-attribute-values.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports and pull requests are welcome on GitHub.
 
 ## License
 

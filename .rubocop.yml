@@ -20,6 +20,7 @@ Metrics/BlockLength:
   Exclude:
     - spec/**/*
     - test/**/*
+    - pundit-expected-attribute-values.gemspec
 
 Metrics/MethodLength:
   Max: 15

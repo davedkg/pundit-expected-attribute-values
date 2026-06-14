@@ -38,6 +38,17 @@ RSpec.describe Pundit::ExpectedAttributeValues::Filter do
       )
       expect(result.key?(:tags)).to be false
     end
+
+    it "preserves the permitted state of permitted params" do
+      params.permit!
+      result = described_class.call(params, { role: %w[user admin] }, invalid: :strip, policy: policy)
+      expect(result).to be_permitted
+    end
+
+    it "leaves unpermitted params unpermitted" do
+      result = described_class.call(params, { role: %w[user admin] }, invalid: :strip, policy: policy)
+      expect(result).not_to be_permitted
+    end
   end
 
   describe ".call with :raise" do

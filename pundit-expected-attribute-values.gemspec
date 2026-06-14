@@ -5,7 +5,7 @@ require_relative "lib/pundit/expected_attribute_values/version"
 Gem::Specification.new do |spec|
   spec.name = "pundit-expected-attribute-values"
   spec.version = Pundit::ExpectedAttributeValues::VERSION
-  spec.authors = ["David Guilfoyle"]
+  spec.authors = ["davedkg"]
   spec.email = ["davedkg@users.noreply.github.com"]
 
   spec.summary = "Expected attribute values for Pundit policies"
@@ -17,7 +17,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
-  spec.metadata["changelog_uri"] = "#{spec.homepage}/releases"
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
@@ -26,7 +27,9 @@ Gem::Specification.new do |spec|
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
     ls.readlines("\x0", chomp: true).reject do |f|
       (f == gemspec) ||
-        f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
+        f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile]) ||
+        f.end_with?(".gem") ||
+        %w[.rspec .rubocop.yml .ruby-version Rakefile].include?(f)
     end
   end
   spec.require_paths = ["lib"]
