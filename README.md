@@ -123,7 +123,9 @@ class PostPolicy < ApplicationPolicy
 
   private
 
-  def allowed_comment_roles = %w[member moderator]
+  def allowed_comment_roles
+    %w[member moderator]
+  end
 end
 ```
 
