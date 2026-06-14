@@ -29,7 +29,8 @@ Gem::Specification.new do |spec|
       (f == gemspec) ||
         f.start_with?(*%w[bin/ test/ spec/ features/ example/ .git .github appveyor Gemfile]) ||
         f.end_with?(".gem") ||
-        %w[.rspec .rubocop.yml .ruby-version .fasterer.yml Rakefile].include?(f)
+        %w[.rspec .rubocop.yml .ruby-version .fasterer.yml Rakefile
+           CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md].include?(f)
     end
   end
   spec.require_paths = ["lib"]
