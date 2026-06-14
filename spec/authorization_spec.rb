@@ -86,6 +86,45 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
     end
   end
 
+  describe "#expected_attributes with nested attributes" do
+    subject(:filtered) { nested_controller.expected_attributes(post) }
+
+    let(:post) { TestPost.new }
+    let(:post_policy) { TestPostPolicy.new(TestUser.new(admin: true), post) }
+    let(:nested_controller) do
+      controller_class.new.tap do |c|
+        c.params = ActionController::Parameters.new(test_post: { title: "T", comments_attributes: comments })
+        c.policy_instance = post_policy
+      end
+    end
+
+    before { Pundit::ExpectedAttributeValues.invalid_behavior = :strip }
+
+    context "with array-form nested params" do
+      let(:comments) { [{ body: "b", status: "spam" }, { body: "c", status: "visible" }] }
+
+      it "strips an invalid nested value" do
+        expect(filtered[:comments_attributes][0].key?(:status)).to be false
+      end
+
+      it "keeps a valid nested value" do
+        expect(filtered[:comments_attributes][1][:status]).to eq("visible")
+      end
+    end
+
+    context "with numeric hash-index nested params" do
+      let(:comments) { { "0" => { body: "b", status: "spam" }, "1" => { body: "c", status: "hidden" } } }
+
+      it "strips the invalid record's value" do
+        expect(filtered[:comments_attributes]["0"].key?(:status)).to be false
+      end
+
+      it "keeps the valid record's value" do
+        expect(filtered[:comments_attributes]["1"][:status]).to eq("hidden")
+      end
+    end
+  end
+
   describe "#pundit_expected_attribute_values_for" do
     let(:user) { TestUser.new(admin: true) }
 

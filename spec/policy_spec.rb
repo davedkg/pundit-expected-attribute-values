@@ -48,4 +48,17 @@ RSpec.describe Pundit::ExpectedAttributeValues::Policy do
       end
     end
   end
+
+  describe "#expected_attribute_values_for_action with nested constraints" do
+    subject(:constraints) do
+      TestPostPolicy.new(TestUser.new(admin: true), TestPost.new).expected_attribute_values_for_action("update")
+    end
+
+    it "returns the declared nested constraint hash" do
+      expect(constraints[:comments_attributes]).to eq(
+        status: %w[visible hidden],
+        author_attributes: { role: %w[member moderator] }
+      )
+    end
+  end
 end

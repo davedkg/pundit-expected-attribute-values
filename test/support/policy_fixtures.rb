@@ -60,3 +60,35 @@ class TestUserUpdatePolicy < TestUserPolicy
     { role: %w[user] }
   end
 end
+
+class TestPost
+end
+
+# Demonstrates nested-attribute constraints for accepts_nested_attributes_for.
+# A Hash-valued constraint declares nested constraints (recursing to arbitrary
+# depth); leaf sources stay Array/Proc/Symbol.
+class TestPostPolicy
+  include Pundit::ExpectedAttributeValues::Policy
+
+  attr_reader :user, :record
+
+  def initialize(user, record)
+    @user = user
+    @record = record
+  end
+
+  def expected_attributes_for_action(_action)
+    [:title, :status, { comments_attributes: [[:id, :body, :status, :_destroy,
+                                               { author_attributes: %i[id name role] }]] }]
+  end
+
+  def expected_attribute_values
+    {
+      status: %w[draft published],
+      comments_attributes: {
+        status: %w[visible hidden],
+        author_attributes: { role: %w[member moderator] }
+      }
+    }
+  end
+end

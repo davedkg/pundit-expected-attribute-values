@@ -97,6 +97,47 @@ Given `params` of `tags: %w[ruby java rails]`:
 - with `invalid_behavior = :strip` (default), out-of-set elements are dropped — `tags` becomes `%w[ruby rails]` (the key is omitted entirely if no elements remain).
 - with `invalid_behavior = :raise`, any out-of-set element raises `Pundit::ExpectedAttributeValues::UnexpectedValue`.
 
+### Nested attributes (`accepts_nested_attributes_for`)
+
+Constraints can reach into nested records. Declare a constraint value as a **`Hash`** to describe the nested record's fields; it recurses to arbitrary depth. Leaf values stay `Array` / `Proc` / `Symbol` as usual.
+
+```ruby
+class PostPolicy < ApplicationPolicy
+  def expected_attributes_for_action(_action)
+    # keys: the usual nested strong-params shape for params.expect
+    [:title, :status, { comments_attributes: [[:id, :body, :status, :_destroy,
+                                               { author_attributes: [:id, :name, :role] }]] }]
+  end
+
+  def expected_attribute_values_for_action(_action)
+    {
+      status: %w[draft published],
+      comments_attributes: {           # Hash ⇒ nested constraints (recurses)
+        status: %w[visible hidden],
+        author_attributes: {           # deeper nesting
+          role: :allowed_comment_roles # leaf source still resolves via the policy
+        }
+      }
+    }
+  end
+
+  private
+
+  def allowed_comment_roles = %w[member moderator]
+end
+```
+
+Each nested record's declared fields are validated the same way scalars and arrays are. The filter handles the array form (`comments_attributes: [{…}, {…}]`), the hash-index form (`comments_attributes: {"0" => {…}}`, keyed by index or record id — integers, UUIDs, etc.), and a single nested record (`author_attributes: {…}`).
+
+Undeclared keys — including `id` and `_destroy` — **pass through untouched**; only fields you constrain are filtered. `:strip` drops invalid nested values, `:raise` raises on the first one.
+
+> **Nested constraints must be a literal `Hash`.** The nesting is detected from the declared value's type, _before_ `Proc`/`Symbol` sources are resolved — so a callable or method reference that *returns* a `Hash` is treated as a leaf, not as nesting. Hardcode the nested shape and use `Proc`/`Symbol` only at the leaves (as `role:` does above):
+>
+> ```ruby
+> comments_attributes: { status: %w[visible hidden] }      # ✅ nested
+> comments_attributes: -> { { status: %w[visible hidden] } } # ❌ treated as a leaf, not nesting
+> ```
+
 ### Controller
 
 ```ruby

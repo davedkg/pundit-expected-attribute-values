@@ -36,4 +36,11 @@ class PolicyTest < Minitest::Test
     assert_equal %w[alpha beta],
                  policy.pundit_expected_attribute_values_for_attribute(:groups, action: "update")
   end
+
+  def test_nested_constraints_resolved_for_action
+    policy = TestPostPolicy.new(TestUser.new(admin: true), TestPost.new)
+    constraints = policy.expected_attribute_values_for_action("update")
+    assert_equal({ status: %w[visible hidden], author_attributes: { role: %w[member moderator] } },
+                 constraints[:comments_attributes])
+  end
 end
