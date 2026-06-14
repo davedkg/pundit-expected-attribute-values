@@ -64,4 +64,4 @@ bundle exec rspec spec/policies     # RSpec matchers
 bin/rails test test/policies        # Minitest assertions
 ```
 
-Both suites run in CI (see `.github/workflows/main.yml` at the repo root).
+Both suites run in CI (see `.github/workflows/example.yml` at the repo root).
