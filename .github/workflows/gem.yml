@@ -1,4 +1,4 @@
-name: Gem
+name: gem
 
 on:
   push:
