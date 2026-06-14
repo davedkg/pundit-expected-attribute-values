@@ -1,0 +1,40 @@
+# frozen_string_literal: true
+
+require_relative "lib/pundit/expected_attribute_values/version"
+
+Gem::Specification.new do |spec|
+  spec.name = "pundit-expected-attribute-values"
+  spec.version = Pundit::ExpectedAttributeValues::VERSION
+  spec.authors = ["davedkg"]
+  spec.email = ["davedkg@users.noreply.github.com"]
+
+  spec.summary = "Expected attribute values for Pundit policies"
+  spec.description = "Extend Pundit expected_attributes with per-attribute allowed values, " \
+                     "declared in policy classes alongside expected_attributes_for_action."
+  spec.homepage = "https://github.com/davedkg/pundit-expected-attribute-values"
+  spec.license = "MIT"
+  spec.required_ruby_version = ">= 3.3.0"
+
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
+  spec.metadata["rubygems_mfa_required"] = "true"
+
+  # Specify which files should be added to the gem when it is released.
+  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
+  gemspec = File.basename(__FILE__)
+  spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+    ls.readlines("\x0", chomp: true).reject do |f|
+      (f == gemspec) ||
+        f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile]) ||
+        f.end_with?(".gem") ||
+        %w[.rspec .rubocop.yml .ruby-version Rakefile].include?(f)
+    end
+  end
+  spec.require_paths = ["lib"]
+
+  spec.add_dependency "actionpack", ">= 7.0"
+  spec.add_dependency "activesupport", ">= 7.0"
+  spec.add_dependency "pundit", ">= 2.5", "< 3.0"
+end

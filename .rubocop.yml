@@ -1,0 +1,31 @@
+AllCops:
+  TargetRubyVersion: 3.3
+  NewCops: enable
+  SuggestExtensions: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  EnforcedStyle: double_quotes
+
+Style/MultilineBlockChain:
+  Exclude:
+    - spec/**/*
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - test/**/*
+    - pundit-expected-attribute-values.gemspec
+
+Metrics/MethodLength:
+  Max: 15
+
+Lint/EmptyClass:
+  Exclude:
+    - spec/**/*
+    - test/**/*
