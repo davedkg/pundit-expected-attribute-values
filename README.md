@@ -1,6 +1,7 @@
 # pundit-expected-attribute-values
 
 [![Gem](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/gem.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/gem.yml)
+[![Example app](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/example.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/example.yml)
 [![Gem Version](https://badge.fury.io/rb/pundit-expected-attribute-values.svg)](https://badge.fury.io/rb/pundit-expected-attribute-values)
 
 Expected **values** for [Pundit](https://github.com/varvet/pundit) strong parameters. Works with Pundit 2.6+ `expected_attributes` / `expected_attributes_for_action` and Rails `params.expect`.
