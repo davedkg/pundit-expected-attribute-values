@@ -1,5 +1,5 @@
 class PostsController < ApplicationController
-  before_action :set_post, only: [:show, :edit, :update]
+  before_action :set_post, only: [ :show, :edit, :update ]
 
   def index
     @posts = Post.includes(comments: :author).order(created_at: :desc)

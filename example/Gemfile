@@ -21,6 +21,11 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 end
 
+group :development do
+  # Ruby styling for the example app (Rails' default linter).
+  gem "rubocop-rails-omakase", require: false
+end
+
 group :test do
   gem "rspec-rails", ">= 7.0"
 end

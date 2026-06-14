@@ -24,9 +24,9 @@ class PostPolicy < ApplicationPolicy
 
   # Strong-parameter *keys* (the shape passed to params.expect).
   def expected_attributes_for_action(_action)
-    [:title, :status, { tags: [],
-                        comments_attributes: [[:id, :body, :status, :_destroy,
-                                               { author_attributes: [:id, :name, :role] }]] }]
+    [ :title, :status, { tags: [],
+                        comments_attributes: [ [ :id, :body, :status, :_destroy,
+                                               { author_attributes: [ :id, :name, :role ] } ] ] } ]
   end
 
   # Allowed *values* for those keys. A Hash value declares nested constraints.

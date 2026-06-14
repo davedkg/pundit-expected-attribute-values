@@ -1,7 +1,7 @@
 # Vanilla session-based "sign in as" — no passwords, no Devise. Pick one of the
 # seeded users to act as, then sign out to choose another.
 class SessionsController < ApplicationController
-  skip_before_action :require_login, only: [:new, :create]
+  skip_before_action :require_login, only: [ :new, :create ]
 
   def new
     @users = User.order(:role, :name)

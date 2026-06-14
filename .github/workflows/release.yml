@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish to RubyGems
     environment: release
+    # rubygems/release-gem still nests a Node 20 action (actions/checkout@v4);
+    # opt into Node 24 now (forced by GitHub from 2026-06-16) to clear the
+    # deprecation warning.
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: read
       id-token: write

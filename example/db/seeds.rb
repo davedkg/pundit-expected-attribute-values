@@ -1,5 +1,5 @@
 # One user per role so you can sign in and watch the allowed values change.
-[Comment, Post, Author, User].each(&:destroy_all)
+[ Comment, Post, Author, User ].each(&:destroy_all)
 
 member = User.create!(name: "Mia Member", role: "member")
 editor = User.create!(name: "Eddie Editor", role: "editor")

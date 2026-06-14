@@ -63,4 +63,23 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
       - name: Run RuboCop
-        run: bundle exec rubocop
+        run: bundle exec rubocop lib spec test bin Rakefile Gemfile pundit-expected-attribute-values.gemspec
+
+  fasterer:
+    runs-on: ubuntu-latest
+    name: Fasterer (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run Fasterer
+        run: bundle exec fasterer

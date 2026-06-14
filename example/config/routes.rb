@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   # Pick a seeded user to sign in as, then sign out to switch users.
   root "sessions#new"
-  resource :session, only: [:create, :destroy]
+  resource :session, only: [ :create, :destroy ]
 
   resources :posts
 end
