@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
-  let(:manager) { TestUser.new(manager: true) }
+  subject(:filtered) { controller.expected_attributes(record) }
+
   let(:record) { TestRecord.new }
-  let(:policy) { TestUserPolicy.new(manager, record) }
+  let(:user) { TestUser.new(manager: true) }
+  let(:policy) { TestUserPolicy.new(user, record) }
+  let(:submitted) { { name: "Ada", role: "manager" } }
 
   let(:controller_class) do
     Class.new do
@@ -23,59 +26,65 @@ RSpec.describe Pundit::ExpectedAttributeValues::Authorization do
 
   let(:controller) do
     controller_class.new.tap do |c|
-      c.params = ActionController::Parameters.new(
-        test_record: { name: "Ada", role: "manager" }
-      )
+      c.params = ActionController::Parameters.new(test_record: submitted)
       c.policy_instance = policy
     end
   end
 
-  describe "#pundit_expected_attribute_values_for" do
-    it "delegates to the policy" do
-      admin_policy = TestUserPolicy.new(TestUser.new(admin: true), record)
-      controller.policy_instance = admin_policy
-      expect(controller.pundit_expected_attribute_values_for(record, :role)).to eq(%w[user manager admin])
-    end
+  around do |example|
+    original = Pundit::ExpectedAttributeValues.invalid_behavior
+    example.run
+    Pundit::ExpectedAttributeValues.invalid_behavior = original
   end
 
   describe "#expected_attributes" do
-    it "filters values after params extraction" do
-      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
-      result = controller.expected_attributes(record)
-      expect(result[:name]).to eq("Ada")
-      expect(result.key?(:role)).to be false
-    end
+    context "with :strip" do
+      before { Pundit::ExpectedAttributeValues.invalid_behavior = :strip }
 
-    it "raises when configured with :raise" do
-      Pundit::ExpectedAttributeValues.invalid_behavior = :raise
-      expect { controller.expected_attributes(record) }
-        .to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue)
-    ensure
-      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
-    end
-
-    it "filters array attribute elements end-to-end (:strip)" do
-      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
-      controller.params = ActionController::Parameters.new(
-        test_record: { name: "Ada", tags: %w[ruby java rails] }
-      )
-      result = controller.expected_attributes(record)
-      expect(result[:name]).to eq("Ada")
-      expect(result[:tags]).to eq(%w[ruby rails])
-    end
-
-    it "raises on an invalid array element end-to-end (:raise)" do
-      Pundit::ExpectedAttributeValues.invalid_behavior = :raise
-      controller.params = ActionController::Parameters.new(
-        test_record: { name: "Ada", tags: %w[ruby java] }
-      )
-      expect { controller.expected_attributes(record) }
-        .to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
-        expect(error.attribute).to eq(:tags)
-        expect(error.value).to eq("java")
+      context "with an unexpected scalar value" do
+        it "filters values after params extraction" do
+          expect(filtered[:name]).to eq("Ada")
+          expect(filtered.key?(:role)).to be false
+        end
       end
-    ensure
-      Pundit::ExpectedAttributeValues.invalid_behavior = :strip
+
+      context "with an array attribute" do
+        let(:submitted) { { name: "Ada", tags: %w[ruby java rails] } }
+
+        it "filters elements to the expected set" do
+          expect(filtered[:name]).to eq("Ada")
+          expect(filtered[:tags]).to eq(%w[ruby rails])
+        end
+      end
+    end
+
+    context "with :raise" do
+      before { Pundit::ExpectedAttributeValues.invalid_behavior = :raise }
+
+      context "with an unexpected scalar value" do
+        it "raises UnexpectedValue" do
+          expect { filtered }.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue)
+        end
+      end
+
+      context "with an invalid array element" do
+        let(:submitted) { { name: "Ada", tags: %w[ruby java] } }
+
+        it "raises UnexpectedValue for the offending element" do
+          expect { filtered }.to raise_error(Pundit::ExpectedAttributeValues::UnexpectedValue) do |error|
+            expect(error.attribute).to eq(:tags)
+            expect(error.value).to eq("java")
+          end
+        end
+      end
+    end
+  end
+
+  describe "#pundit_expected_attribute_values_for" do
+    let(:user) { TestUser.new(admin: true) }
+
+    it "delegates to the policy" do
+      expect(controller.pundit_expected_attribute_values_for(record, :role)).to eq(%w[user manager admin])
     end
   end
 
