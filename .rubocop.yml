@@ -2,6 +2,9 @@ AllCops:
   TargetRubyVersion: 3.3
   NewCops: enable
   SuggestExtensions: false
+  Exclude:
+    # The example app is self-contained (its own bundle/style); not linted here.
+    - "example/**/*"
 
 Style/Documentation:
   Enabled: false

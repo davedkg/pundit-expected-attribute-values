@@ -64,3 +64,51 @@ jobs:
           bundler-cache: true
       - name: Run RuboCop
         run: bundle exec rubocop
+
+  example-minitest:
+    runs-on: ubuntu-latest
+    name: Example app · Minitest (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          working-directory: example
+      - name: Prepare test database
+        run: bin/rails db:test:prepare
+        working-directory: example
+      - name: Run policy tests (Minitest)
+        run: bin/rails test test/policies
+        working-directory: example
+
+  example-rspec:
+    runs-on: ubuntu-latest
+    name: Example app · RSpec (${{ matrix.ruby }})
+    strategy:
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          working-directory: example
+      - name: Prepare test database
+        run: bin/rails db:test:prepare
+        working-directory: example
+      - name: Run policy specs (RSpec)
+        run: bundle exec rspec spec/policies
+        working-directory: example

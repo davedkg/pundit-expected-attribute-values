@@ -41,6 +41,12 @@ class ApplicationController < ActionController::Base
 end
 ```
 
+## Example app
+
+A runnable Rails app demonstrating scalar, collection, and nested constraints —
+plus the form-values helper and `:strip`/`:raise` — lives in [`example/`](example/).
+See [example/README.md](example/README.md) to run it and its policy specs.
+
 ## Usage
 
 ### Policy

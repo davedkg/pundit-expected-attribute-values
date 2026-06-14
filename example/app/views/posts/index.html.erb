@@ -1,0 +1,15 @@
+<% content_for :title, "Posts" %>
+<h1>Posts</h1>
+<p><%= link_to "New post", new_post_path %></p>
+
+<% if @posts.empty? %>
+  <p>No posts yet.</p>
+<% end %>
+
+<% @posts.each do |post| %>
+  <article style="border:1px solid #ddd;padding:.75rem;margin:.5rem 0">
+    <h3><%= link_to post.title, post %> <small>(<%= post.status %>)</small></h3>
+    <p>Tags: <%= post.tags.presence&.join(", ") || "—" %></p>
+    <p><%= pluralize(post.comments.size, "comment") %></p>
+  </article>
+<% end %>

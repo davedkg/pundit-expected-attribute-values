@@ -1,0 +1,11 @@
+<% content_for :title, "Sign in" %>
+<h1>Sign in as…</h1>
+<p>Pick a user. Their role changes which attribute values the policy allows.</p>
+
+<ul>
+  <% @users.each do |user| %>
+    <li style="margin:.25rem 0">
+      <%= button_to "#{user.name} — #{user.role}", session_path(user_id: user.id), method: :post %>
+    </li>
+  <% end %>
+</ul>

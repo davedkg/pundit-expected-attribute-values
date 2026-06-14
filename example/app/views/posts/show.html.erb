@@ -1,0 +1,26 @@
+<% content_for :title, @post.title %>
+<p><%= link_to "← All posts", posts_path %> · <%= link_to "Edit", edit_post_path(@post) %></p>
+
+<h1><%= @post.title %></h1>
+<ul>
+  <li><strong>Status:</strong> <%= @post.status.presence || "—" %></li>
+  <li><strong>Tags:</strong> <%= @post.tags.presence&.join(", ") || "—" %></li>
+</ul>
+
+<h2>Comments</h2>
+<% if @post.comments.empty? %>
+  <p>None.</p>
+<% else %>
+  <ul>
+    <% @post.comments.each do |comment| %>
+      <li>
+        “<%= comment.body %>” — status: <strong><%= comment.status.presence || "—" %></strong>,
+        author: <%= comment.author&.name || "—" %>
+        (role: <strong><%= comment.author&.role.presence || "—" %></strong>)
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<p><em>Anything you submitted that the policy didn't allow was filtered out, so
+it won't appear above.</em></p>
