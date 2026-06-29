@@ -1,3 +1,5 @@
+![Extend Pundit's expected_attributes with value-level restrictions: define not only which attributes can be updated, but also what values they can be set to.](docs/overview.png)
+
 # pundit-expected-attribute-values
 
 [![CI](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml)
