@@ -1,0 +1,12 @@
+<% content_for :title, "Unexpected value" %>
+<h1>Unexpected value (422)</h1>
+<p>
+  <code>invalid_behavior</code> is set to <code>:raise</code>, so the policy
+  rejected an out-of-set value instead of stripping it:
+</p>
+<ul>
+  <li><strong>Attribute:</strong> <%= @error.attribute %></li>
+  <li><strong>Value:</strong> <%= @error.value.inspect %></li>
+  <li><strong>Allowed:</strong> <%= @error.expected.inspect %></li>
+</ul>
+<p><%= link_to "← Back", root_path %></p>

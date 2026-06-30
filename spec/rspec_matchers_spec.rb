@@ -3,25 +3,29 @@
 require "pundit/expected_attribute_values/rspec"
 
 RSpec.describe "Pundit expected value matchers" do
-  let(:admin) { TestUser.new(admin: true) }
-  let(:manager) { TestUser.new(manager: true) }
-  let(:record) { TestRecord.new }
-  let(:admin_policy) { TestUserPolicy.new(admin, record) }
-  let(:manager_policy) { TestUserPolicy.new(manager, record) }
+  subject(:policy) { TestUserPolicy.new(user, TestRecord.new) }
+
+  let(:user) { TestUser.new(admin: true) }
 
   describe "permit_expected_value" do
-    it "passes for expected values" do
-      expect(admin_policy).to permit_expected_value(:role, "admin")
+    context "for a scalar attribute" do
+      it { is_expected.to permit_expected_value(:role, "admin") }
+
+      context "when the user is a manager" do
+        let(:user) { TestUser.new(manager: true) }
+
+        it { is_expected.not_to permit_expected_value(:role, "admin") }
+      end
     end
 
-    it "fails for unexpected values" do
-      expect(manager_policy).not_to permit_expected_value(:role, "admin")
+    context "for a collection attribute" do
+      it { is_expected.to permit_expected_value(:tags, "ruby") }
+      it { is_expected.not_to permit_expected_value(:tags, "java") }
     end
   end
 
   describe "permit_expected_values" do
-    it "matches the full expected set" do
-      expect(admin_policy).to permit_expected_values(:role).matching(%w[user manager admin])
-    end
+    it { is_expected.to permit_expected_values(:role).matching(%w[user manager admin]) }
+    it { is_expected.to permit_expected_values(:tags).matching(%w[ruby rails pundit]) }
   end
 end

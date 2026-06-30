@@ -2,12 +2,13 @@
 
 # pundit-expected-attribute-values
 
-[![CI](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/main.yml)
 [![Gem Version](https://badge.fury.io/rb/pundit-expected-attribute-values.svg)](https://badge.fury.io/rb/pundit-expected-attribute-values)
+[![gem](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/gem.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/gem.yml)
+[![example app](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/example.yml/badge.svg)](https://github.com/davedkg/pundit-expected-attribute-values/actions/workflows/example.yml)
 
 Expected **values** for [Pundit](https://github.com/varvet/pundit) strong parameters. Works with Pundit 2.6+ `expected_attributes` / `expected_attributes_for_action` and Rails `params.expect`.
 
-Declare which scalar values each attribute may have during mass assignment (for example, admins may set `role` to `manager` or `user`, while managers may only set `role` to `user`).
+Declare which values each attribute may have during mass assignment (for example, admins may set `role` to `manager` or `user`, while managers may only set `role` to `user`). Attributes may be **scalar or array (collection)** — for an array attribute, each submitted element is validated against the allowed set.
 
 Keys stay in `expected_attributes_for_action`; allowed values live in `expected_attribute_values_for_action`.
 
@@ -43,6 +44,12 @@ class ApplicationController < ActionController::Base
 end
 ```
 
+## Example app
+
+A runnable Rails app demonstrating scalar, collection, and nested constraints —
+plus the form-values helper and `:strip`/`:raise` — lives in [`example/`](example/).
+See [example/README.md](example/README.md) to run it and its policy specs.
+
 ## Usage
 
 ### Policy
@@ -77,6 +84,70 @@ end
 ```
 
 Value sources: static arrays, callables (`-> { ... }`), or method references (`:allowed_roles`).
+
+### Collection (array) attributes
+
+An attribute submitted as an array (e.g. a multi-select like `tag_ids` or `roles[]`) is validated element by element against the same allowed set:
+
+```ruby
+class ArticlePolicy < ApplicationPolicy
+  def expected_attributes_for_action(_action)
+    [:title, { tags: [] }] # keys: declare the array shape for params.expect
+  end
+
+  def expected_attribute_values_for_action(_action)
+    { tags: %w[ruby rails pundit] } # allowed values for each element
+  end
+end
+```
+
+Given `params` of `tags: %w[ruby java rails]`:
+
+- with `invalid_behavior = :strip` (default), out-of-set elements are dropped — `tags` becomes `%w[ruby rails]` (the key is omitted entirely if no elements remain).
+- with `invalid_behavior = :raise`, any out-of-set element raises `Pundit::ExpectedAttributeValues::UnexpectedValue`.
+
+### Nested attributes (`accepts_nested_attributes_for`)
+
+Constraints can reach into nested records. Declare a constraint value as a **`Hash`** to describe the nested record's fields; it recurses to arbitrary depth. Leaf values stay `Array` / `Proc` / `Symbol` as usual.
+
+```ruby
+class PostPolicy < ApplicationPolicy
+  def expected_attributes_for_action(_action)
+    # keys: the usual nested strong-params shape for params.expect
+    [:title, :status, { comments_attributes: [[:id, :body, :status, :_destroy,
+                                               { author_attributes: [:id, :name, :role] }]] }]
+  end
+
+  def expected_attribute_values_for_action(_action)
+    {
+      status: %w[draft published],
+      comments_attributes: {           # Hash ⇒ nested constraints (recurses)
+        status: %w[visible hidden],
+        author_attributes: {           # deeper nesting
+          role: :allowed_comment_roles # leaf source still resolves via the policy
+        }
+      }
+    }
+  end
+
+  private
+
+  def allowed_comment_roles
+    %w[member moderator]
+  end
+end
+```
+
+Each nested record's declared fields are validated the same way scalars and arrays are. The filter handles the array form (`comments_attributes: [{…}, {…}]`), the hash-index form (`comments_attributes: {"0" => {…}}`, keyed by index or record id — integers, UUIDs, etc.), and a single nested record (`author_attributes: {…}`).
+
+Undeclared keys — including `id` and `_destroy` — **pass through untouched**; only fields you constrain are filtered. `:strip` drops invalid nested values, `:raise` raises on the first one.
+
+> **Nested constraints must be a literal `Hash`.** The nesting is detected from the declared value's type, _before_ `Proc`/`Symbol` sources are resolved — so a callable or method reference that *returns* a `Hash` is treated as a leaf, not as nesting. Hardcode the nested shape and use `Proc`/`Symbol` only at the leaves (as `role:` does above):
+>
+> ```ruby
+> comments_attributes: { status: %w[visible hidden] }      # ✅ nested
+> comments_attributes: -> { { status: %w[visible hidden] } } # ❌ treated as a leaf, not nesting
+> ```
 
 ### Controller
 

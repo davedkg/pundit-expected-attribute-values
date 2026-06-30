@@ -13,3 +13,5 @@ gem "rails", ">= 7.0"
 gem "rspec", "~> 3.0"
 
 gem "rubocop", "~> 1.88"
+
+gem "fasterer", require: false

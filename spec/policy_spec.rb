@@ -1,26 +1,64 @@
 # frozen_string_literal: true
 
 RSpec.describe Pundit::ExpectedAttributeValues::Policy do
-  let(:admin) { TestUser.new(admin: true) }
-  let(:manager) { TestUser.new(manager: true) }
+  subject(:expected_values) { policy.pundit_expected_attribute_values_for_attribute(attribute, action: "update") }
+
   let(:record) { TestRecord.new }
+  let(:user) { TestUser.new(admin: true) }
+  let(:policy) { TestUserPolicy.new(user, record) }
 
   describe "#pundit_expected_attribute_values_for_attribute" do
-    it "returns expected roles for admin" do
-      policy = TestUserPolicy.new(admin, record)
-      expect(policy.pundit_expected_attribute_values_for_attribute(:role, action: "update")).to eq(
-        %w[user manager admin]
+    context "for the role attribute" do
+      let(:attribute) { :role }
+
+      context "when the user is an admin" do
+        it { is_expected.to eq(%w[user manager admin]) }
+      end
+
+      context "when the user is a manager" do
+        let(:user) { TestUser.new(manager: true) }
+
+        it { is_expected.to eq(%w[user]) }
+      end
+
+      context "with an action-specific policy" do
+        let(:policy) { TestUserUpdatePolicy.new(user, record) }
+
+        it { is_expected.to eq(%w[user]) }
+      end
+    end
+
+    context "for a collection attribute" do
+      context "from a static array source" do
+        let(:attribute) { :tags }
+
+        it { is_expected.to eq(%w[ruby rails pundit]) }
+      end
+
+      context "from a method reference source" do
+        let(:attribute) { :labels }
+
+        it { is_expected.to eq(%w[bug feature chore]) }
+      end
+
+      context "from a callable source" do
+        let(:attribute) { :groups }
+
+        it { is_expected.to eq(%w[alpha beta]) }
+      end
+    end
+  end
+
+  describe "#expected_attribute_values_for_action with nested constraints" do
+    subject(:constraints) do
+      TestPostPolicy.new(TestUser.new(admin: true), TestPost.new).expected_attribute_values_for_action("update")
+    end
+
+    it "returns the declared nested constraint hash" do
+      expect(constraints[:comments_attributes]).to eq(
+        status: %w[visible hidden],
+        author_attributes: { role: %w[member moderator] }
       )
-    end
-
-    it "returns restricted roles for manager" do
-      policy = TestUserPolicy.new(manager, record)
-      expect(policy.pundit_expected_attribute_values_for_attribute(:role, action: "update")).to eq(%w[user])
-    end
-
-    it "uses action-specific values when defined" do
-      policy = TestUserUpdatePolicy.new(admin, record)
-      expect(policy.pundit_expected_attribute_values_for_attribute(:role, action: "update")).to eq(%w[user])
     end
   end
 end
