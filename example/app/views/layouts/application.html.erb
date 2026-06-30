@@ -17,20 +17,8 @@
   </head>
 
   <body>
-    <header style="border-bottom:1px solid #ccc;padding:.5rem 1rem;display:flex;gap:1rem;align-items:center">
-      <%= link_to "Posts", posts_path %>
-      <span style="margin-left:auto">
-        <% if current_user %>
-          Signed in as <strong><%= current_user.name %></strong> (<%= current_user.role %>) ·
-          <%= button_to "Sign out", session_path, method: :delete %>
-        <% else %>
-          <%= link_to "Sign in", root_path %>
-        <% end %>
-      </span>
-    </header>
-
-    <% if notice %><p style="color:green;padding:0 1rem"><%= notice %></p><% end %>
-    <% if alert %><p style="color:#b00;padding:0 1rem"><%= alert %></p><% end %>
+    <% if notice %><p style="color:green;padding:1rem"><%= notice %></p><% end %>
+    <% if alert %><p style="color:#b00;padding:1rem"><%= alert %></p><% end %>
 
     <main style="padding:1rem;max-width:760px">
       <%= yield %>
